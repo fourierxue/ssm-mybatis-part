@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace等于mapper接口类的全限定名,这样实现对应-->
+<mapper namespace="com.xd.mapper.EmployeeMapper">
+    <!-- 提取sql片段-->
+    <sql id="selectSql">
+        select * from t_emp
+    </sql>
+    <!--if 标签
+    where 标签自动添加where关键字，自动去掉多余的and or-->
+    <select id="query" resultType="employee">
+        <include refid="selectSql"/>
+        <where>
+            <if test="name != null">
+                emp_name = #{name}
+            </if>
+            <if test="salary != null and salary > 100">
+                and emp_salary = #{salary}
+            </if>
+        </where>
+    </select>
+
+    <!--trim标签-->
+    <select id="queryTrim" resultType="employee">
+        select * from t_emp
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="name != null">
+                emp_name = #{name}
+            </if>
+            <if test="salary != null and salary > 100">
+                and emp_salary = #{salary}
+            </if>
+        </trim>
+    </select>
+    <update id="updateTrim">
+        update t_emp
+        <trim prefix="set" suffixOverrides=",">
+            <if test="empName != null">
+                emp_name = #{empName},
+            </if>
+            <if test="empSalary != null">
+                emp_salary = #{empSalary},
+            </if>
+        </trim>
+        where emp_id = #{empId}
+    </update>
+    <!-- set标签 自动去掉多余逗号 自动添加set关键字 不能所有条件都不满足-->
+    <update id="update">
+        update t_emp set
+            <if test="empName != null">
+            emp_name = #{empName},
+            </if>
+            <if test="empSalary != null">
+            emp_salary = #{empSalary},
+            </if>
+            where emp_id = #{empId}
+    </update>
+    <!--choose标签，选择第一个满足的分支-->
+    <select id="queryChoose" resultType="employee">
+        select * from t_emp
+        <where>
+            <choose>
+                <when test="name != null">
+                    emp_name = #{name}
+                </when>
+                <when test="salary != null">
+                    emp_salary = #{salary}
+                </when>
+                <otherwise>1=1</otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <select id="queryBatch" resultType="employee">
+        select * from t_emp where emp_id in
+        <foreach collection="ids" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+    <delete id="deleteBatch">
+        delete from t_emp where emp_id in
+        <foreach collection="ids" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+    <insert id="insertBatch">
+        insert into t_emp (emp_name, emp_salary) values
+        <foreach collection="employeeList" item="item" separator=",">
+            (#{item.empName}, #{item.empSalary})
+        </foreach>
+    </insert>
+    <!-- 如果一个标签设计多个语句，需要在数据库连接上加配置allowMultiQueries=true-->
+    <update id="updateBatch">
+        <foreach collection="employeeList" item="item" separator=",">
+            update t_emp set emp_name = #{item.empName}, emp_salary = #{item.empSalary} where emp_id = #{item.empId};
+        </foreach>
+    </update>
+</mapper>

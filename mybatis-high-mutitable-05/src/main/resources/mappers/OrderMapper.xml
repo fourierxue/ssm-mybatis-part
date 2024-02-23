@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace等于mapper接口类的全限定名,这样实现对应 -->
+<mapper namespace="com.xd.mapper.OrderMapper">
+    <!-- 自定义映射关系，嵌套，resultType无法嵌套-->
+    <!-- 默认情况下resultMap会自动映射一层的result标签【列名和属性名相同或者开启且符合驼峰映射】
+    包含嵌套 association|collection 的情况下，不会自动映射，autoMappingBehavior 属性设置为FULL，可以自动映射包含嵌套的情况-->
+    <resultMap id="orderMap" type="order">
+        <id column="order_id" property="orderId"/>
+        <result column="order_name" property="orderName"/>
+        <result column="customer_id" property="customerId"/>
+        <association property="customer" javaType="customer">
+            <id column="customer_id" property="customerId"/>
+            <result column="customer_name" property="customerName"/>
+        </association>
+    </resultMap>
+    <select id="queryOrderById" resultMap="orderMap">
+        select * from t_order o join t_customer c on o.customer_id = c.customer_id where o.order_id = #{id}
+    </select>
+</mapper>

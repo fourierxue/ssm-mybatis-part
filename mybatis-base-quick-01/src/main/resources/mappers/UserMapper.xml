@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace等于mapper接口类的全限定名,这样实现对应 -->
+<mapper namespace="com.xd.mapper.UserMapper">
+    <insert id="insertUser" parameterType="User">
+        <!--
+        before 在插入之前执行
+        -->
+        <selectKey keyProperty="id" resultType="java.lang.String"
+                   order="BEFORE">
+            SELECT UUID() as id
+        </selectKey>
+        INSERT INTO user (id, username, password)
+        VALUES (
+        #{id},
+        #{username},
+        #{password}
+        )
+    </insert>
+</mapper>
